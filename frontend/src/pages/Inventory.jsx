@@ -42,6 +42,7 @@ function StockInModal({ isOpen, onClose, onSave, product, loading }) {
             {product?.productName}
           </p>
           <p className="text-xs text-gray-400 mt-1">Current stock: {product?.quantity ?? 0}</p>
+          <p className="text-xs text-gray-400 mt-1">Low Stock Threshold: {product?.lowStockThreshold ?? 0}</p>
         </div>
         <Input
           label="Quantity to Add"
@@ -139,16 +140,16 @@ function MovementsModal({ isOpen, onClose, product }) {
   )
 }
 
-function getStockVariant(qty) {
-  if (qty <= 5) return 'danger'
-  if (qty <= 20) return 'warning'
+function getStockVariant(qty, lowThreshold) {
+  if (qty <= lowThreshold) return 'danger'
+  if (qty - lowThreshold <= 10) return 'warning'
   return 'success'
 }
 
-function getStockLabel(qty) {
-  if (qty <= 5) return 'Critical'
-  if (qty <= 20) return 'Low'
-  return 'OK'
+function getStockLabel(stockVariant) {
+  if (stockVariant === "danger") return 'Critical'
+  if (stockVariant === "warning") return 'Low'
+  return 'Ok'
 }
 
 export default function Inventory() {
@@ -197,6 +198,7 @@ export default function Inventory() {
 
   const headers = ['Product', 'Category', 'Current Stock', 'Status', 'Actions']
 
+  let stockVariant;
   return (
     <Layout>
       <div className="space-y-5">
@@ -217,15 +219,16 @@ export default function Inventory() {
                     <td className="px-4 py-3 text-gray-500">{item.categoryName || '—'}</td>
                     <td className="px-4 py-3 font-bold text-lg">
                       <span className={
-                        item.quantity <= 5 ? 'text-red-600' :
-                        item.quantity <= 20 ? 'text-yellow-600' : 'text-green-600'
+                        (stockVariant =
+                            getStockVariant(item.quantity, item.lowStockThreshold)) === 'danger' ? 'text-red-600' :
+                                stockVariant === 'warning' ? 'text-yellow-600' : 'text-green-600'
                       }>
                         {formatNumber(item.quantity)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant={getStockVariant(item.quantity)}>
-                        {getStockLabel(item.quantity)}
+                      <Badge variant={stockVariant}>
+                        {getStockLabel(stockVariant)}
                       </Badge>
                     </td>
                     <td className="px-4 py-3">

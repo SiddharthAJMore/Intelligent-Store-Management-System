@@ -25,5 +25,7 @@ public class ProductRequest {
     @NotBlank
     private String unit;
 
+    private int lowStockThreshold;
+
     private String sku;
 }

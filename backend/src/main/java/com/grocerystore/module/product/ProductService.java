@@ -4,6 +4,8 @@ import com.grocerystore.common.exception.ResourceNotFoundException;
 import com.grocerystore.common.response.PageResponse;
 import com.grocerystore.module.category.entity.Category;
 import com.grocerystore.module.category.repository.CategoryRepository;
+import com.grocerystore.module.inventory.entity.Inventory;
+import com.grocerystore.module.inventory.repository.InventoryRepository;
 import com.grocerystore.module.product.dto.ProductRequest;
 import com.grocerystore.module.product.dto.ProductResponse;
 import com.grocerystore.module.product.entity.Product;
@@ -24,10 +26,12 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final InventoryRepository inventoryRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, InventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     public PageResponse<ProductResponse> list(Long categoryId, Boolean active, String search, int page, int size, String sortBy, String direction) {
@@ -88,6 +92,12 @@ public class ProductService {
 
         Category category = categoryRepository.findById(request.getCategoryId())
             .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        Inventory inventory = inventoryRepository.findByProductId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory for Product not found"));
+
+        inventory.setLowStockThreshold(request.getLowStockThreshold());
+        inventoryRepository.save(inventory);
 
         product.setName(request.getName());
         product.setCategory(category);
