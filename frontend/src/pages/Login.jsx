@@ -121,7 +121,7 @@ export default function Login() {
           </form>
         </div>
         <p className="text-center text-xs text-gray-400 mt-4">
-          Smart Grocery Management System © 2024
+          Smart Grocery Management System © 2026
         </p>
       </div>
     </div>

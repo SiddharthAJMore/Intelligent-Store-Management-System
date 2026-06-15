@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/inventory")
-@PreAuthorize("hasRole('ADMIN')")
 public class InventoryController {
 
     private final InventoryService inventoryService;
@@ -22,6 +21,7 @@ public class InventoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','CASHIER')")
     public ResponseEntity<ApiResponse<PageResponse<InventoryResponse>>> getInventory(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
@@ -36,6 +36,7 @@ public class InventoryController {
     }
 
     @GetMapping("/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<InventoryResponse>> getByProduct(@PathVariable Long productId) {
         return ResponseEntity.ok(ApiResponse.<InventoryResponse>builder()
             .success(true)
@@ -45,6 +46,7 @@ public class InventoryController {
     }
 
     @PostMapping("/stock-in")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<InventoryResponse>> stockIn(@Valid @RequestBody StockInRequest request) {
         return ResponseEntity.ok(ApiResponse.<InventoryResponse>builder()
             .success(true)
@@ -54,6 +56,7 @@ public class InventoryController {
     }
 
     @GetMapping("/low-stock")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PageResponse<InventoryResponse>>> lowStock(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
@@ -68,6 +71,7 @@ public class InventoryController {
     }
 
     @GetMapping("/movements/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PageResponse<StockMovementResponse>>> movements(
         @PathVariable Long productId,
         @RequestParam(defaultValue = "0") int page,

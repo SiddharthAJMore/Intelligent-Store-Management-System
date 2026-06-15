@@ -173,7 +173,6 @@ export default function Analytics() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <div className="mb-4">
             <h2 className="text-base font-semibold text-gray-700">Restock Suggestions</h2>
-            <p className="text-xs text-gray-400 mt-0.5">AI-powered restocking recommendations</p>
           </div>
 
           {restockLoading ? (

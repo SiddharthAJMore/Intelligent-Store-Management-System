@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     Optional<Inventory> findByProductId(Long productId);
 
-    @Query("SELECT i FROM Inventory i WHERE i.quantity <= i.lowStockThreshold")
+    @Query("SELECT i FROM Inventory i " +
+            "WHERE i.quantity <= i.lowStockThreshold + 5")
     Page<Inventory> findLowStock(Pageable pageable);
 }

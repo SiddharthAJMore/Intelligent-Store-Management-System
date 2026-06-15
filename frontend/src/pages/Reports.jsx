@@ -187,7 +187,7 @@ export default function Reports() {
                       <td className="px-4 py-3 font-medium text-gray-800">{p.productName}</td>
                       <td className="px-4 py-3 text-gray-500">{p.categoryName || '—'}</td>
                       <td className="px-4 py-3 text-right font-semibold text-gray-700">{formatNumber(p.totalUnits)}</td>
-                      <td className="px-4 py-3 text-right font-bold text-green-700">{formatCurrency(p.revenue)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-green-700">{formatCurrency(p.totalRevenue)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -213,6 +213,7 @@ export default function Reports() {
                     <th className="px-4 py-3 text-left font-semibold text-gray-600">Product</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-600">Category</th>
                     <th className="px-4 py-3 text-right font-semibold text-gray-600">Current Stock</th>
+                    <th className="text-right py-2 px-3 font-semibold text-gray-600">Low Stock Threshold</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
                   </tr>
                 </thead>
@@ -226,9 +227,17 @@ export default function Reports() {
                           {item.currentStock ?? item.quantity ?? 0}
                         </span>
                       </td>
+                      <td className="py-2 px-3 text-right font-semibold">
+                        <span
+                            className={item.lowStockThreshold - item.quantity >= 5 ? 'text-red-600' : 'text-yellow-600'}>
+                          {item.lowStockThreshold}
+                        </span>
+                      </td>
                       <td className="px-4 py-3">
-                        <Badge variant={item.currentStock <= 5 ? 'danger' : 'warning'}>
-                          {item.currentStock <= 5 ? 'Critical' : 'Low'}
+                        <Badge variant={item.lowStockThreshold - item.quantity >= 5 || item.lowStockThreshold - item.quantity > 0
+                            ? 'danger' : 'warning'}>
+                          {item.lowStockThreshold - item.quantity >= 5
+                            || item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
                         </Badge>
                       </td>
                     </tr>

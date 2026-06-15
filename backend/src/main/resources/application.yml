@@ -21,10 +21,10 @@ app:
   jwt:
     secret: ${JWT_SECRET:+Q3SmJ1Mcpr0QKbFFw9u1Xo6L5IOdfRE2xWbp569EBgTXdMy074yRXdhLGdPZJtz}
     expiration: ${JWT_EXPIRATION:86400000}
-logging:
-  file:
-    name: app.log
-  level:
-    root: INFO
-    com.grocerystore: DEBUG
+#logging:
+#  file:
+#    name: app.log
+#  level:
+#    root: INFO
+#    com.grocerystore: DEBUG
 
