@@ -20,6 +20,8 @@ export default function SalesHistory() {
   const [totalPages, setTotalPages] = useState(0)
   const [fromDate, setFromDate] = useState(today())
   const [toDate, setToDate] = useState(today())
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortDirection, setSortDirection] = useState('desc')
   const [viewInvoice, setViewInvoice] = useState(null)
   const [viewLoading, setViewLoading] = useState(false)
 
@@ -27,7 +29,7 @@ export default function SalesHistory() {
     const load = async () => {
       setLoading(true)
       try {
-        const params = { page, size: 10 }
+        const params = { page, size: 10, sortBy, direction: sortDirection }
         if (fromDate) params.from = fromDate
         if (toDate) params.to = toDate
         const res = await getInvoices(params)
@@ -41,7 +43,7 @@ export default function SalesHistory() {
       }
     }
     load()
-  }, [page, fromDate, toDate]) // Re-run when these change
+  }, [page, fromDate, toDate, sortBy, sortDirection]) // Re-run when sort changes
 
   const handleView = async (id) => {
     setViewLoading(true)
@@ -55,7 +57,38 @@ export default function SalesHistory() {
     }
   }
 
-  const headers = ['Invoice #', 'Cashier', 'Total', 'Date & Time', 'Actions']
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortDirection('asc')
+    }
+    setPage(0)
+  }
+
+  const SortableHeader = ({ children, field }) => {
+    const isActive = sortBy === field
+    return (
+      <button
+        onClick={() => handleSort(field)}
+        className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
+      >
+        {children}
+        <span className="text-xs">
+          {isActive ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </button>
+    )
+  }
+
+  const headers = [
+    <SortableHeader field="invoiceNumber">Invoice #</SortableHeader>,
+    <SortableHeader field="cashierUsername">Cashier</SortableHeader>,
+    <SortableHeader field="totalAmount">Total</SortableHeader>,
+    <SortableHeader field="createdAt">Date & Time</SortableHeader>,
+    'Actions'
+  ]
 
   return (
     <Layout>

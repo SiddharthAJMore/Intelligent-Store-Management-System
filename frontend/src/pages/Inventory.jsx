@@ -158,6 +158,8 @@ export default function Inventory() {
   const [saving, setSaving] = useState(false)
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+  const [sortBy, setSortBy] = useState('productName')
+  const [sortDirection, setSortDirection] = useState('asc')
   const [stockInTarget, setStockInTarget] = useState(null)
   const [movementsTarget, setMovementsTarget] = useState(null)
 
@@ -165,7 +167,7 @@ export default function Inventory() {
     const load = async () => {
       setLoading(true)
       try {
-        const res = await getInventory({ page, size: 10 })
+        const res = await getInventory({ page, size: 10, sortBy, direction: sortDirection })
         const d = res.data?.data || res.data
         setItems(d?.content || d || [])
         setTotalPages(d?.totalPages ?? 1)
@@ -176,7 +178,7 @@ export default function Inventory() {
       }
     }
     load()
-  }, [page]) // Only re-run when page changes
+  }, [page, sortBy, sortDirection]) // Re-run when sort changes too
 
   const handleStockIn = async (data) => {
     setSaving(true)
@@ -184,8 +186,8 @@ export default function Inventory() {
       await stockIn(data)
       toast.success('Stock added successfully')
       setStockInTarget(null)
-      // Reload inventory
-      const res = await getInventory({ page, size: 10 })
+      // Reload inventory with current sort
+      const res = await getInventory({ page, size: 10, sortBy, direction: sortDirection })
       const d = res.data?.data || res.data
       setItems(d?.content || d || [])
       setTotalPages(d?.totalPages ?? 1)
@@ -196,7 +198,38 @@ export default function Inventory() {
     }
   }
 
-  const headers = ['Product', 'Category', 'Current Stock', 'Status', 'Actions']
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortDirection('asc')
+    }
+    setPage(0)
+  }
+
+  const SortableHeader = ({ children, field }) => {
+    const isActive = sortBy === field
+    return (
+      <button
+        onClick={() => handleSort(field)}
+        className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
+      >
+        {children}
+        <span className="text-xs">
+          {isActive ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </button>
+    )
+  }
+
+  const headers = [
+    <SortableHeader field="productName">Product</SortableHeader>,
+    <SortableHeader field="categoryName">Category</SortableHeader>,
+    <SortableHeader field="quantity">Current Stock</SortableHeader>,
+    <SortableHeader field="status">Status</SortableHeader>,
+    'Actions'
+  ]
 
   let stockVariant;
   return (
