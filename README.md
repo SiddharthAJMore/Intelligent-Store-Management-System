@@ -75,8 +75,8 @@ cd Intelligent-Store-Management-System
 
 1. Start PostgreSQL locally.
 2. Create a database for the project.
-3. Run the provided SQL DDL/DML scripts to create tables and seed data.
-4. Update database credentials in `backend/src/main/resources/application.yml`.
+3. Start the backend; Flyway will automatically apply migrations from `backend/src/main/resources/db/migration` to create tables and seed data.
+4. Update database connection settings via env vars (e.g., `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) or edit `backend/src/main/resources/application.yml`.
 
 Example:
 
