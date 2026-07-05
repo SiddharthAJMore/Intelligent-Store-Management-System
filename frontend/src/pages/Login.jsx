@@ -54,7 +54,7 @@ export default function Login() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
               <span className="text-4xl">🛒</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">Smart Grocery</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Smart Store</h1>
             <p className="text-gray-500 text-sm mt-1">Billing & Inventory Management</p>
           </div>
 
@@ -121,7 +121,7 @@ export default function Login() {
           </form>
         </div>
         <p className="text-center text-xs text-gray-400 mt-4">
-          Smart Grocery Management System © 2026
+          Smart Store Management System © 2026
         </p>
       </div>
     </div>

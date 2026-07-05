@@ -44,7 +44,7 @@ export default function Dashboard() {
             setLoading(true)
             try {
                 const [summaryRes, topRes, lowRes, prodRes] = await Promise.allSettled([
-                    getSalesSummary({period: 'daily'}),
+                    getSalesSummary({period: 'hourly'}),
                     getTopProducts({limit: 5, days: 30}),
                     getLowStock({page: 0, size: 5}),
                     getProductCount(),
@@ -131,7 +131,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h2 className="text-base font-semibold text-gray-700 mb-4">Revenue Trend (Last 30 Days)</h2>
+                        <h2 className="text-base font-semibold text-gray-700 mb-4">Revenue Today</h2>
                         {chartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height={250}>
                                 <LineChart data={chartData} margin={{top: 5, right: 20, left: 0, bottom: 5}}>

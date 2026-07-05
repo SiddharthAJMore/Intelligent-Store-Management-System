@@ -31,8 +31,6 @@ function ProductModal({ isOpen, onClose, onSave, initialData, categories, loadin
     if (!form.categoryId) errs.categoryId = 'Category is required'
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0)
       errs.price = 'Valid price is required'
-    if (!form.lowStockThreshold || isNaN(Number(form.lowStockThreshold)) || Number(form.lowStockThreshold) <= 0)
-      errs.lowStockThreshold = 'Valid threshold is required'
     if (!form.unit.trim()) errs.unit = 'Unit is required'
     setErrors(errs)
     return Object.keys(errs).length === 0
@@ -79,8 +77,6 @@ function ProductModal({ isOpen, onClose, onSave, initialData, categories, loadin
         <div className="grid grid-cols-2 gap-3">
           <Input label="SKU" name="sku" value={form.sku} onChange={handleChange}
             placeholder="Optional SKU code" />
-          <Input label="Low Stock Threshold" name="lowStockThreshold" type="number" step="1" min="0"
-                 value={form.lowStockThreshold} onChange={handleChange} error={errors.lowStockThreshold} placeholder="0" />
         </div>
 
         <div className="flex gap-3 pt-2">

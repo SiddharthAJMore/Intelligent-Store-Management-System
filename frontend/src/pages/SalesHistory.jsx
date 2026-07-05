@@ -84,7 +84,7 @@ export default function SalesHistory() {
 
   const headers = [
     <SortableHeader field="invoiceNumber">Invoice #</SortableHeader>,
-    <SortableHeader field="cashierUsername">Cashier</SortableHeader>,
+    <SortableHeader field="cashier.username">Cashier</SortableHeader>,
     <SortableHeader field="totalAmount">Total</SortableHeader>,
     <SortableHeader field="createdAt">Date & Time</SortableHeader>,
     'Actions'
@@ -140,7 +140,7 @@ export default function SalesHistory() {
                     <td className="px-4 py-3 font-mono font-semibold text-gray-800">
                       #{inv.invoiceNumber || inv.id}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{inv.cashierName || inv.createdBy || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600">{inv.cashierUsername || '—'}</td>
                     <td className="px-4 py-3 font-bold text-green-700">{formatCurrency(inv.totalAmount)}</td>
                     <td className="px-4 py-3 text-gray-500 text-sm">{formatDate(inv.createdAt)}</td>
                     <td className="px-4 py-3">

@@ -10,6 +10,7 @@ import Badge from '../components/common/Badge'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import { formatNumber, formatDate } from '../utils/formatters'
 import { getInventory, stockIn, getMovements } from '../api/inventory'
+import {getCategories} from "../api/categories.js";
 
 function StockInModal({ isOpen, onClose, onSave, product, loading }) {
   const [form, setForm] = useState({ quantity: '', notes: '' })
@@ -154,6 +155,7 @@ function getStockLabel(stockVariant) {
 
 export default function Inventory() {
   const [items, setItems] = useState([])
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [page, setPage] = useState(0)
@@ -171,6 +173,11 @@ export default function Inventory() {
         const d = res.data?.data || res.data
         setItems(d?.content || d || [])
         setTotalPages(d?.totalPages ?? 1)
+
+        const categoryRes = await getCategories()
+        const categoryData = categoryRes.data?.data || categoryRes.data
+        const cats = categoryData?.content || categoryData || []
+        setCategories(Array.isArray(cats) ? cats : [])
       } catch {
         toast.error('Failed to load inventory')
       } finally {
@@ -225,8 +232,9 @@ export default function Inventory() {
 
   const headers = [
     <SortableHeader field="productName">Product</SortableHeader>,
-    <SortableHeader field="categoryName">Category</SortableHeader>,
+    <SortableHeader field="ProductCategoryName">Category</SortableHeader>,
     <SortableHeader field="quantity">Current Stock</SortableHeader>,
+    'Low stock Threshold',
     <SortableHeader field="status">Status</SortableHeader>,
     'Actions'
   ]
@@ -249,14 +257,23 @@ export default function Inventory() {
                 renderRow={(item) => (
                   <>
                     <td className="px-4 py-3 font-medium text-gray-800">{item.productName}</td>
-                    <td className="px-4 py-3 text-gray-500">{item.categoryName || '—'}</td>
-                    <td className="px-4 py-3 font-bold text-lg">
+                    <td className="px-4 py-3 text-gray-500">{categories.find(cat=>cat.id===item.categoryId).name || '—'}</td>
+                    <td className="px-12 py-3 font-bold text-lg">
                       <span className={
                         (stockVariant =
                             getStockVariant(item.quantity, item.lowStockThreshold)) === 'danger' ? 'text-red-600' :
                                 stockVariant === 'warning' ? 'text-yellow-600' : 'text-green-600'
                       }>
                         {formatNumber(item.quantity)}
+                      </span>
+                    </td>
+                    <td className="px-16 py-3 font-bold text-lg">
+                      <span className={
+                        (stockVariant =
+                            getStockVariant(item.quantity, item.lowStockThreshold)) === 'danger' ? 'text-red-600' :
+                            stockVariant === 'warning' ? 'text-yellow-600' : 'text-green-600'
+                      }>
+                        {formatNumber(item.lowStockThreshold)}
                       </span>
                     </td>
                     <td className="px-4 py-3">

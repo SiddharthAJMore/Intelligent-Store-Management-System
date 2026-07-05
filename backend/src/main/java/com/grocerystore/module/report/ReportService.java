@@ -5,6 +5,7 @@ import com.grocerystore.module.inventory.entity.Inventory;
 import com.grocerystore.module.inventory.repository.InventoryRepository;
 import com.grocerystore.module.report.dto.SalesSummaryResponse;
 import com.grocerystore.module.report.dto.TopProductResponse;
+import com.grocerystore.module.sales.entity.SalesInvoice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -47,10 +48,13 @@ public class ReportService {
             // Start of current month
             fromDate = now.with(TemporalAdjusters.firstDayOfMonth())
                     .withHour(0).withMinute(0).withSecond(0);
-        } else {
+        } else if ("daily".equals(normalized)) {
             // Start of today
-            fromDate = now.withHour(0).withMinute(0).withSecond(0);
+            fromDate = now.minusDays(30).withHour(0).withMinute(0).withSecond(0);
             normalized = "daily";
+        } else {
+            fromDate = now.withHour(0).withMinute(0).withSecond(0);
+            normalized = "hourly";
         }
 
         Long invoiceCount = jdbcTemplate.queryForObject(
@@ -82,7 +86,29 @@ public class ReportService {
         List<SalesSummaryResponse.DailyBreakdown> breakdown = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
-        if ("daily".equals(period)) {
+        if ("hourly".equals(period)) {
+            record HourRecords(LocalDateTime dateTime, BigDecimal revenue) {}
+
+            List<HourRecords> hourBucket= jdbcTemplate.query(
+                    "SELECT " +
+                            "DATE_TRUNC('hour', created_at) AS hour_bucket, " +
+                            "SUM(total_amount) AS hourly_revenue " +
+                            "FROM sales_invoices " +
+                            "WHERE DATE(created_at) = CURRENT_DATE " +
+                            "GROUP BY hour_bucket " +
+                            "ORDER BY hour_bucket;",
+                    (rs, rowNum) -> new HourRecords (rs.getTimestamp("hour_bucket").toLocalDateTime(),
+                                rs.getBigDecimal("hourly_revenue"))
+            );
+
+            hourBucket.stream().forEach( hb ->
+                    breakdown.add(SalesSummaryResponse.DailyBreakdown.builder()
+                            .label(hb.dateTime.format(DateTimeFormatter.ofPattern("HH:mm")))
+                            .revenue(hb.revenue)
+                            .invoiceCount(hourBucket.size())
+                            .build())
+            );
+        } else if ("daily".equals(period)) {
             // Last 30 days
             LocalDate today = LocalDate.now();
             for (int i = 29; i >= 0; i--) {
@@ -175,6 +201,7 @@ public class ReportService {
             }
         }
 
+        System.out.println("Breakdown:"+breakdown);
         return breakdown;
     }
 
@@ -182,7 +209,7 @@ public class ReportService {
         LocalDateTime fromDate = LocalDateTime.now().minusDays(days);
         return jdbcTemplate.query(
                 """
-                        SELECT p.id, p.name, COALESCE(SUM(sii.quantity), 0) AS total_units, COALESCE(SUM(sii.subtotal), 0) AS total_revenue
+                        SELECT p.id, p.name, p.category_id, COALESCE(SUM(sii.quantity), 0) AS total_units, COALESCE(SUM(sii.subtotal), 0) AS total_revenue
                         FROM products p
                         JOIN sales_invoice_items sii ON sii.product_id = p.id
                         JOIN sales_invoices si ON si.id = sii.invoice_id
@@ -193,6 +220,7 @@ public class ReportService {
                         """,
                 (rs, rowNum) -> TopProductResponse.builder()
                         .productId(rs.getLong("id"))
+                        .categoryId(rs.getLong("category_id"))
                         .productName(rs.getString("name"))
                         .totalUnits(rs.getLong("total_units"))
                         .totalRevenue(rs.getBigDecimal("total_revenue"))
@@ -208,6 +236,7 @@ public class ReportService {
                 .map(i -> com.grocerystore.module.inventory.dto.InventoryResponse.builder()
                         .productId(i.getProduct().getId())
                         .productName(i.getProduct().getName())
+                        .categoryId(i.getProduct().getCategory().getId())
                         .quantity(i.getQuantity())
                         .lowStockThreshold(i.getLowStockThreshold())
                         .lowStock(true)

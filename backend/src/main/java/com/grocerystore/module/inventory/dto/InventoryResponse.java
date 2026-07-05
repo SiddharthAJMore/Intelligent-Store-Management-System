@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class InventoryResponse {
     private Long productId;
     private String productName;
+    private Long categoryId;
     private Integer quantity;
     private Integer lowStockThreshold;
     private boolean lowStock;

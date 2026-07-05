@@ -14,8 +14,7 @@ public interface SalesInvoiceRepository extends JpaRepository<SalesInvoice, Long
     Optional<SalesInvoice> findByInvoiceNumber(String invoiceNumber);
 
     @Query("SELECT s FROM SalesInvoice s WHERE " +
-           "s.createdAt >= :fromDate AND s.createdAt <= :toDate " +
-           "ORDER BY s.createdAt DESC")
+           "s.createdAt >= :fromDate AND s.createdAt <= :toDate")
     Page<SalesInvoice> findByCreatedAtRange(
         @Param("fromDate") LocalDateTime fromDate,
         @Param("toDate") LocalDateTime toDate,

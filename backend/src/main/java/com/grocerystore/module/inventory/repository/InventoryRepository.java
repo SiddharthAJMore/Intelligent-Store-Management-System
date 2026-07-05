@@ -12,6 +12,14 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     Optional<Inventory> findByProductId(Long productId);
 
     @Query("SELECT i FROM Inventory i " +
-            "WHERE i.quantity <= i.lowStockThreshold + 5")
+            "WHERE i.quantity <= i.lowStockThreshold + 10")
     Page<Inventory> findLowStock(Pageable pageable);
+
+    @Query("SELECT i FROM Inventory i " +
+            "ORDER BY (i.quantity - i.lowStockThreshold) ASC")
+    Page<Inventory> findAllOrderByStatusAsc(Pageable pageable);
+
+    @Query("SELECT i FROM Inventory i " +
+            "ORDER BY (i.quantity - i.lowStockThreshold) DESC")
+    Page<Inventory> findAllOrderByStatusDesc(Pageable pageable);
 }

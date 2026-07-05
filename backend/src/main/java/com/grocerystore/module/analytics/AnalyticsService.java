@@ -35,7 +35,6 @@ public class AnalyticsService {
 
     @Transactional
     public void runAnalysis() {
-        long startTime = System.currentTimeMillis();
         log.info("Starting analytics batch analysis...");
         
         log.debug("Clearing existing association rules...");
