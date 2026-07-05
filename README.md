@@ -1,18 +1,43 @@
 # Intelligent Store Management System
 
-A full-stack retail management system for small and medium grocery stores, built to combine billing, inventory tracking, and basic analytics in one place.
+[![Java](https://img.shields.io/badge/Java-17-blue.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-Vite-61dafb.svg)](https://react.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+A production-minded full-stack retail management system for grocery stores and small retail businesses. The application combines billing, inventory management, stock movement tracking, and sales visibility in a single platform to support faster operations and better decision-making.
 
 ## Overview
 
-This project provides a practical point-of-sale and store management solution with:
+Small and medium grocery stores often rely on disconnected tools for billing, inventory, and reporting. This project addresses that gap by providing a unified system where transactional data and inventory data stay synchronized in real time.
 
-- Fast invoice generation
-- Real-time inventory updates
-- Stock movement tracking
-- Sales and purchase data visibility
-- Basic analytics for store operations
+It is designed to help store owners and cashiers:
 
-The system is designed to help grocery stores manage daily operations more efficiently while keeping data consistent across billing and inventory.
+- process sales efficiently
+- keep inventory updated automatically
+- track stock movement history
+- manage products and categories
+- monitor operational activity through reporting
+
+## Key Features
+
+### Core Operations
+
+- Role-based authentication for `ADMIN` and `CASHIER`
+- Fast POS billing workflow
+- Real-time inventory updates after each sale
+- Product and category management
+- Stock movement audit trail
+- Sales tracking and reporting
+
+### Business Value
+
+- Reduces manual billing effort
+- Improves stock visibility
+- Helps prevent stockouts and overstocking
+- Maintains consistency between billing and inventory data
+- Supports better day-to-day retail decisions
 
 ## Tech Stack
 
@@ -20,49 +45,46 @@ The system is designed to help grocery stores manage daily operations more effic
 - **Frontend:** React, Vite
 - **Database:** PostgreSQL
 
-## Project Structure
+## Repository Structure
 
-- `backend/` — Spring Boot application for APIs, business logic, security, and database access
-- `frontend/` — React application for the user interface
-- SQL scripts — used for database schema creation and data provisioning
+- `backend/` — Spring Boot backend for REST APIs, business logic, security, and persistence
+- `frontend/` — React frontend for the user interface
+- SQL scripts — used for schema creation and data provisioning
 
-## Features
+## Prerequisites
 
-- User authentication with role-based access
-- POS billing workflow
-- Inventory management
-- Stock movement audit trail
-- Product and category management
-- Sales tracking and reporting
-- Data-driven store insights
-
-## Default Users
-
-Use these credentials for local development:
-
-| Username | Password | Role |
-| --- | --- | --- |
-| `admin` | `Test@1234` | ADMIN |
-| `siddharth_m` | `Test@1234` | CASHIER |
-| `devraj_s` | `Test@1234` | CASHIER |
-
-## Local Setup
-
-### Prerequisites
+Before running the project, make sure the following are installed:
 
 - Java 17+
 - Maven 3.8+
 - Node.js 18+
 - npm 9+
 - PostgreSQL 15+
+- Git
 
-### Database Setup
+## Local Setup
 
-1. Create a PostgreSQL database.
-2. Run the SQL DDL/DML scripts provided in the repository to create the schema and seed the data.
-3. Update database credentials in `backend/src/main/resources/application.yml`.
+### 1. Clone the repository
 
-### Backend Setup
+```bash
+git clone https://github.com/SiddharthAJMore/Intelligent-Store-Management-System.git
+cd Intelligent-Store-Management-System
+```
+
+### 2. Database setup
+
+1. Start PostgreSQL locally.
+2. Create a database for the project.
+3. Run the provided SQL DDL/DML scripts to create tables and seed data.
+4. Update database credentials in `backend/src/main/resources/application.yml`.
+
+Example:
+
+```sql
+CREATE DATABASE grocery_db;
+```
+
+### 3. Run the backend
 
 ```bash
 cd backend
@@ -70,7 +92,11 @@ mvn clean install -DskipTests
 mvn spring-boot:run
 ```
 
-### Frontend Setup
+The backend service will start using the configuration defined in `application.yml`.
+
+### 4. Run the frontend
+
+Open a new terminal:
 
 ```bash
 cd frontend
@@ -78,18 +104,38 @@ npm install
 npm run dev
 ```
 
-The frontend typically runs at:
+Then open:
 
 ```text
 http://localhost:5173
 ```
 
-## Notes
+## Default Users
 
-- Backend and frontend are deployed/run separately.
-- Secrets are currently managed through `application.yml`.
-- Deployment and screenshots can be added later.
+Use these credentials for local testing:
+
+| Username | Password | Role |
+| --- | --- | --- |
+| `admin` | `Test@1234` | ADMIN |
+| `siddharth_m` | `Test@1234` | CASHIER |
+| `devraj_s` | `Test@1234` | CASHIER |
+
+## Configuration Notes
+
+- Backend and frontend are run separately.
+- Secrets are currently managed in `application.yml`.
+- Database provisioning is handled through SQL scripts.
+- Deployment details and screenshots can be added later when available.
+
+## Suggested Future Enhancements
+
+- Environment-based secret management
+- Docker support
+- Centralized logging
+- Automated tests and CI/CD pipeline
+- Screenshots and demo video
+- Production deployment guide
 
 ## License
 
-MIT
+This project is licensed under the MIT License.
