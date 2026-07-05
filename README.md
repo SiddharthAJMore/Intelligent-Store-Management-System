@@ -123,7 +123,7 @@ Use these credentials for local testing:
 ## Configuration Notes
 
 - Backend and frontend are run separately.
-- Secrets are currently managed in `application.yml`.
+- Configuration is primarily via environment variables (e.g., `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`) with defaults defined in `application.yml`.
 - Database provisioning is handled through SQL scripts.
 - Deployment details and screenshots can be added later when available.
 
