@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -8,9 +8,9 @@ import Button from '../components/common/Button'
 import Input from '../components/common/Input'
 import Badge from '../components/common/Badge'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatCurrency } from '../utils/formatters'
-import { getProducts, createProduct, updateProduct, toggleProductStatus } from '../api/products'
-import { getCategories } from '../api/categories'
+import {formatCurrency} from '../utils/formatters'
+import {createProduct, getProducts, toggleProductStatus, updateProduct} from '../api/products'
+import {getCategories} from '../api/categories'
 
 const INITIAL_FORM = { name: '', categoryId: '', price: '', unit: '', sku: '' }
 
@@ -31,6 +31,8 @@ function ProductModal({ isOpen, onClose, onSave, initialData, categories, loadin
     if (!form.categoryId) errs.categoryId = 'Category is required'
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0)
       errs.price = 'Valid price is required'
+    if (!form.lowStockThreshold || isNaN(Number(form.lowStockThreshold)) || Number(form.lowStockThreshold) <= 0)
+      errs.lowStockThreshold = 'Valid threshold is required'
     if (!form.unit.trim()) errs.unit = 'Unit is required'
     setErrors(errs)
     return Object.keys(errs).length === 0
@@ -77,6 +79,8 @@ function ProductModal({ isOpen, onClose, onSave, initialData, categories, loadin
         <div className="grid grid-cols-2 gap-3">
           <Input label="SKU" name="sku" value={form.sku} onChange={handleChange}
             placeholder="Optional SKU code" />
+          <Input label="Low Stock Threshold" name="lowStockThreshold" type="number" step="1" min="0"
+               value={form.lowStockThreshold} onChange={handleChange} error={errors.lowStockThreshold} placeholder="0" />
         </div>
 
         <div className="flex gap-3 pt-2">
@@ -102,7 +106,7 @@ export default function Products() {
   const [saving, setSaving] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editData, setEditData] = useState(null)
-  const [sortBy, setSortBy] = useState('id')
+  const [sortBy, setSortBy] = useState('name')
   const [sortDirection, setSortDirection] = useState('asc')
 
   // Load categories once on mount
@@ -220,7 +224,7 @@ export default function Products() {
 
   const headers = [
     <SortableHeader field="name">Name</SortableHeader>,
-    <SortableHeader field="categoryName">Category</SortableHeader>,
+    <SortableHeader field="category.name">Category</SortableHeader>,
     <SortableHeader field="price">Price</SortableHeader>,
     <SortableHeader field="unit">Unit</SortableHeader>,
     <SortableHeader field="sku">SKU</SortableHeader>,

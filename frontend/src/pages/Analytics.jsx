@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
 import Pagination from '../components/common/Pagination'
 import Button from '../components/common/Button'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatNumber, formatDate } from '../utils/formatters'
-import { runAnalysis, getAssociationRules, getRestockSuggestions } from '../api/analytics'
+import {formatDate, formatNumber} from '../utils/formatters'
+import {getAssociationRules, getRestockSuggestions, runAnalysis} from '../api/analytics'
 
 export default function Analytics() {
   const [running, setRunning] = useState(false)

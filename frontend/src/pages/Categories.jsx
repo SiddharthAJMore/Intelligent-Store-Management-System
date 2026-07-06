@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -7,8 +7,8 @@ import Button from '../components/common/Button'
 import Input from '../components/common/Input'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import Pagination from '../components/common/Pagination'
-import { formatDate } from '../utils/formatters'
-import { getCategories, createCategory, updateCategory, deleteCategory } from '../api/categories'
+import {formatDate} from '../utils/formatters'
+import {createCategory, deleteCategory, getCategories, updateCategory} from '../api/categories'
 
 const INITIAL_FORM = { name: '', description: '' }
 

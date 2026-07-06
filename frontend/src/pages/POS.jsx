@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Modal from '../components/common/Modal'
 import Button from '../components/common/Button'
 import Badge from '../components/common/Badge'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatCurrency } from '../utils/formatters'
-import { getProducts } from '../api/products'
-import { getCategories } from '../api/categories'
-import { getInventory } from '../api/inventory'
-import { createInvoice } from '../api/sales'
+import {formatCurrency} from '../utils/formatters'
+import {getProducts} from '../api/products'
+import {getCategories} from '../api/categories'
+import {getInventory} from '../api/inventory'
+import {createInvoice} from '../api/sales'
 
 function getStockInfo(inventory, productId) {
   if (!inventory) return { qty: null, badge: 'gray', label: 'Unknown' }

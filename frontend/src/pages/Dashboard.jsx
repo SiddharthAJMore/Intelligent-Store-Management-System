@@ -1,13 +1,10 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import toast from 'react-hot-toast'
-import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar
-} from 'recharts'
+import {Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts'
 import Layout from '../components/layout/Layout'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import {formatCurrency, formatNumber} from '../utils/formatters'
-import {getSalesSummary, getTopProducts, getLowStockReport} from '../api/reports'
+import {getSalesSummary, getTopProducts} from '../api/reports'
 import {getProductCount} from '../api/products'
 import {getLowStock} from '../api/inventory'
 import Badge from "../components/common/Badge.jsx";
@@ -44,7 +41,7 @@ export default function Dashboard() {
             setLoading(true)
             try {
                 const [summaryRes, topRes, lowRes, prodRes] = await Promise.allSettled([
-                    getSalesSummary({period: 'hourly'}),
+                    getSalesSummary({period: 'daily'}),
                     getTopProducts({limit: 5, days: 30}),
                     getLowStock({page: 0, size: 5}),
                     getProductCount(),

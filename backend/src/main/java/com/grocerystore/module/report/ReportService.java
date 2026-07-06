@@ -86,29 +86,7 @@ public class ReportService {
         List<SalesSummaryResponse.DailyBreakdown> breakdown = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
-        if ("hourly".equals(period)) {
-            record HourRecords(LocalDateTime dateTime, BigDecimal revenue) {}
-
-            List<HourRecords> hourBucket= jdbcTemplate.query(
-                    "SELECT " +
-                            "DATE_TRUNC('hour', created_at) AS hour_bucket, " +
-                            "SUM(total_amount) AS hourly_revenue " +
-                            "FROM sales_invoices " +
-                            "WHERE DATE(created_at) = CURRENT_DATE " +
-                            "GROUP BY hour_bucket " +
-                            "ORDER BY hour_bucket;",
-                    (rs, rowNum) -> new HourRecords (rs.getTimestamp("hour_bucket").toLocalDateTime(),
-                                rs.getBigDecimal("hourly_revenue"))
-            );
-
-            hourBucket.stream().forEach( hb ->
-                    breakdown.add(SalesSummaryResponse.DailyBreakdown.builder()
-                            .label(hb.dateTime.format(DateTimeFormatter.ofPattern("HH:mm")))
-                            .revenue(hb.revenue)
-                            .invoiceCount(hourBucket.size())
-                            .build())
-            );
-        } else if ("daily".equals(period)) {
+        if ("daily".equals(period)) {
             // Last 30 days
             LocalDate today = LocalDate.now();
             for (int i = 29; i >= 0; i--) {
@@ -201,7 +179,6 @@ public class ReportService {
             }
         }
 
-        System.out.println("Breakdown:"+breakdown);
         return breakdown;
     }
 

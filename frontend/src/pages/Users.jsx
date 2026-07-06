@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -8,8 +8,8 @@ import Button from '../components/common/Button'
 import Input from '../components/common/Input'
 import Badge from '../components/common/Badge'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatDate } from '../utils/formatters'
-import { getUsers, createUser, updateUser, toggleUserStatus } from '../api/users'
+import {formatDate} from '../utils/formatters'
+import {createUser, getUsers, toggleUserStatus, updateUser} from '../api/users'
 
 const ROLES = [
   { id: 1, label: 'ADMIN' },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -6,8 +6,8 @@ import Pagination from '../components/common/Pagination'
 import Modal from '../components/common/Modal'
 import Button from '../components/common/Button'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatCurrency, formatDate } from '../utils/formatters'
-import { getInvoices, getInvoice } from '../api/sales'
+import {formatCurrency, formatDate} from '../utils/formatters'
+import {getInvoice, getInvoices} from '../api/sales'
 
 function today() {
   return new Date().toISOString().split('T')[0]
@@ -179,7 +179,7 @@ export default function SalesHistory() {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Cashier</p>
-                <p className="font-medium text-gray-800">{viewInvoice.cashierName || viewInvoice.createdBy || '—'}</p>
+                <p className="font-medium text-gray-800">{viewInvoice.cashierUsername || viewInvoice.createdBy || '—'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Date & Time</p>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -8,8 +8,8 @@ import Button from '../components/common/Button'
 import Input from '../components/common/Input'
 import Badge from '../components/common/Badge'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatNumber, formatDate } from '../utils/formatters'
-import { getInventory, stockIn, getMovements } from '../api/inventory'
+import {formatDate, formatNumber} from '../utils/formatters'
+import {getInventory, getMovements, stockIn} from '../api/inventory'
 import {getCategories} from "../api/categories.js";
 
 function StockInModal({ isOpen, onClose, onSave, product, loading }) {
@@ -160,7 +160,7 @@ export default function Inventory() {
   const [saving, setSaving] = useState(false)
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
-  const [sortBy, setSortBy] = useState('productName')
+  const [sortBy, setSortBy] = useState('product.name')
   const [sortDirection, setSortDirection] = useState('asc')
   const [stockInTarget, setStockInTarget] = useState(null)
   const [movementsTarget, setMovementsTarget] = useState(null)
@@ -174,10 +174,14 @@ export default function Inventory() {
         setItems(d?.content || d || [])
         setTotalPages(d?.totalPages ?? 1)
 
-        const categoryRes = await getCategories()
-        const categoryData = categoryRes.data?.data || categoryRes.data
-        const cats = categoryData?.content || categoryData || []
-        setCategories(Array.isArray(cats) ? cats : [])
+        try {
+          const categoryRes = await getCategories()
+          const categoryData = categoryRes.data?.data || categoryRes.data
+          const cats = categoryData?.content || categoryData || []
+          setCategories(Array.isArray(cats) ? cats : [])
+        } catch {
+          toast.error('Failed to load categories')
+        }
       } catch {
         toast.error('Failed to load inventory')
       } finally {
@@ -231,8 +235,8 @@ export default function Inventory() {
   }
 
   const headers = [
-    <SortableHeader field="productName">Product</SortableHeader>,
-    <SortableHeader field="ProductCategoryName">Category</SortableHeader>,
+    <SortableHeader field="product.name">Product</SortableHeader>,
+    <SortableHeader field="product.category.name">Category</SortableHeader>,
     <SortableHeader field="quantity">Current Stock</SortableHeader>,
     'Low stock Threshold',
     <SortableHeader field="status">Status</SortableHeader>,
@@ -257,7 +261,7 @@ export default function Inventory() {
                 renderRow={(item) => (
                   <>
                     <td className="px-4 py-3 font-medium text-gray-800">{item.productName}</td>
-                    <td className="px-4 py-3 text-gray-500">{categories.find(cat=>cat.id===item.categoryId).name || '—'}</td>
+                    <td className="px-4 py-3 text-gray-500">{categories.find(cat=>cat.id===item?.categoryId)?.name || '—'}</td>
                     <td className="px-12 py-3 font-bold text-lg">
                       <span className={
                         (stockVariant =

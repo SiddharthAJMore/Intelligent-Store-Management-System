@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react'
-import { getCategories } from '../api/categories'
+import React, {createContext, useCallback, useEffect, useState} from 'react'
+import {getCategories} from '../api/categories'
 
 export const CategoriesContext = createContext(null)
 
