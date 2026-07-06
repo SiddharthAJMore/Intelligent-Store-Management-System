@@ -120,7 +120,7 @@ export default function Analytics() {
   const SortableHeader = ({ children, field, sortBy, sortDirection }) => {
     const isActive = sortBy === field
     return (
-      <button
+      <button type="button"
         onClick={() => {
           if (field === 'coOccurrenceCount' || field === 'support' || field === 'confidence') {
             handleRulesSort(field)

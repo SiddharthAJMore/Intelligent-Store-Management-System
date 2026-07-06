@@ -254,10 +254,9 @@ export default function Reports() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant={item.lowStockThreshold - item.quantity >= 10 || item.lowStockThreshold - item.quantity > 0
+                        <Badge variant={item.lowStockThreshold - item.quantity > 0
                             ? 'danger' : 'warning'}>
-                          {item.lowStockThreshold - item.quantity >= 5
-                            || item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
+                          {item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
                         </Badge>
                       </td>
                     </tr>

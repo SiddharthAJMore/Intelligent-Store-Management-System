@@ -166,6 +166,20 @@ export default function Inventory() {
   const [movementsTarget, setMovementsTarget] = useState(null)
 
   useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoryRes = await getCategories()
+        const categoryData = categoryRes.data?.data || categoryRes.data
+        const cats = categoryData?.content || categoryData || []
+        setCategories(Array.isArray(cats) ? cats : [])
+      } catch {
+        toast.error('Failed to load categories')
+      }
+    }
+    loadCategories()
+  }, [])
+
+  useEffect(() => {
     const load = async () => {
       setLoading(true)
       try {
@@ -173,15 +187,6 @@ export default function Inventory() {
         const d = res.data?.data || res.data
         setItems(d?.content || d || [])
         setTotalPages(d?.totalPages ?? 1)
-
-        try {
-          const categoryRes = await getCategories()
-          const categoryData = categoryRes.data?.data || categoryRes.data
-          const cats = categoryData?.content || categoryData || []
-          setCategories(Array.isArray(cats) ? cats : [])
-        } catch {
-          toast.error('Failed to load categories')
-        }
       } catch {
         toast.error('Failed to load inventory')
       } finally {
@@ -222,7 +227,7 @@ export default function Inventory() {
   const SortableHeader = ({ children, field }) => {
     const isActive = sortBy === field
     return (
-      <button
+      <button type="button"
         onClick={() => handleSort(field)}
         className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
       >
@@ -238,7 +243,7 @@ export default function Inventory() {
     <SortableHeader field="product.name">Product</SortableHeader>,
     <SortableHeader field="product.category.name">Category</SortableHeader>,
     <SortableHeader field="quantity">Current Stock</SortableHeader>,
-    'Low stock Threshold',
+    'Low Stock Threshold',
     <SortableHeader field="status">Status</SortableHeader>,
     'Actions'
   ]

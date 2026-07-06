@@ -43,7 +43,7 @@ export default function Dashboard() {
                 const [summaryRes, topRes, lowRes, prodRes] = await Promise.allSettled([
                     getSalesSummary({period: 'daily'}),
                     getTopProducts({limit: 5, days: 30}),
-                    getLowStock({page: 0, size: 5}),
+                    getLowStock({page: 0, size: 10}),
                     getProductCount(),
                 ])
 
@@ -60,7 +60,7 @@ export default function Dashboard() {
                 if (lowRes.status === 'fulfilled') {
                     const d = lowRes.value.data?.data || lowRes.value.data
                     const items = d?.content || d || []
-                    setLowStockItems(Array.isArray(items) ? items.slice(0, 5) : [])
+                    setLowStockItems(Array.isArray(items) ? items.slice(0, 10) : [])
                     setLowStockCount(d?.totalElements ?? (Array.isArray(items) ? items.length : 0))
                 }
                 if (prodRes.status === 'fulfilled') {
@@ -128,7 +128,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h2 className="text-base font-semibold text-gray-700 mb-4">Revenue Today</h2>
+                        <h2 className="text-base font-semibold text-gray-700 mb-4">Revenue Trend (Last 30 Days)</h2>
                         {chartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height={250}>
                                 <LineChart data={chartData} margin={{top: 5, right: 20, left: 0, bottom: 5}}>
@@ -198,21 +198,20 @@ export default function Dashboard() {
                                         <td className="py-2 px-3 text-gray-500">{item.categoryName || '—'}</td>
                                         <td className="py-2 px-3 text-right font-semibold">
                                             <span
-                                                className={item.lowStockThreshold - item.quantity >= 5 ? 'text-red-600' : 'text-yellow-600'}>
+                                                className={item.lowStockThreshold - item.quantity >= 10 ? 'text-red-600' : 'text-yellow-600'}>
                                               {item.quantity}
                                             </span>
                                         </td>
                                         <td className="py-2 px-3 text-right font-semibold">
                                             <span
-                                                className={item.lowStockThreshold - item.quantity >= 5 ? 'text-red-600' : 'text-yellow-600'}>
+                                                className={item.lowStockThreshold - item.quantity >= 10 ? 'text-red-600' : 'text-yellow-600'}>
                                               {item.lowStockThreshold}
                                             </span>
                                         </td>
                                         <td className="py-2 px-3">
-                                            <Badge variant={item.lowStockThreshold - item.quantity >= 5 || item.lowStockThreshold - item.quantity > 0
+                                            <Badge variant={item.lowStockThreshold - item.quantity > 0
                                                 ? 'danger' : 'warning'}>
-                                                {item.lowStockThreshold - item.quantity >= 5
-                                                || item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
+                                                {item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
                                             </Badge>
                                         </td>
                                     </tr>

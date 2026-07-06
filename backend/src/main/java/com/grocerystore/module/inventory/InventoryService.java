@@ -40,7 +40,7 @@ public class InventoryService {
     }
 
     public PageResponse<InventoryResponse> getInventory(int page, int size, String sortBy, String direction) {
-        log.info("Sort by: {}", sortBy);
+        log.debug("Sort by: {}", sortBy);
         Page<Inventory> result;
         
         // Special handling for status sorting - sort by (quantity - lowStockThreshold)

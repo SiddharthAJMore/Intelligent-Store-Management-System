@@ -165,7 +165,7 @@ export default function Products() {
   const SortableHeader = ({ children, field }) => {
     const isActive = sortBy === field
     return (
-      <button
+      <button type="button"
         onClick={() => handleSort(field)}
         className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
       >
