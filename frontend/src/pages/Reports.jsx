@@ -80,7 +80,7 @@ export default function Reports() {
       } catch {
         toast.error('Failed to load low stock report')
       } finally {
-        setLowLoading(topLoading)
+        setLowLoading(false)
       }
     }
     loadLowStock()
