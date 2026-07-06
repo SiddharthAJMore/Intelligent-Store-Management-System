@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -8,9 +8,9 @@ import Button from '../components/common/Button'
 import Input from '../components/common/Input'
 import Badge from '../components/common/Badge'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatCurrency } from '../utils/formatters'
-import { getProducts, createProduct, updateProduct, toggleProductStatus } from '../api/products'
-import { getCategories } from '../api/categories'
+import {formatCurrency} from '../utils/formatters'
+import {createProduct, getProducts, toggleProductStatus, updateProduct} from '../api/products'
+import {getCategories} from '../api/categories'
 
 const INITIAL_FORM = { name: '', categoryId: '', price: '', unit: '', sku: '' }
 
@@ -80,7 +80,7 @@ function ProductModal({ isOpen, onClose, onSave, initialData, categories, loadin
           <Input label="SKU" name="sku" value={form.sku} onChange={handleChange}
             placeholder="Optional SKU code" />
           <Input label="Low Stock Threshold" name="lowStockThreshold" type="number" step="1" min="0"
-                 value={form.lowStockThreshold} onChange={handleChange} error={errors.lowStockThreshold} placeholder="0" />
+               value={form.lowStockThreshold} onChange={handleChange} error={errors.lowStockThreshold} placeholder="0" />
         </div>
 
         <div className="flex gap-3 pt-2">
@@ -106,6 +106,8 @@ export default function Products() {
   const [saving, setSaving] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editData, setEditData] = useState(null)
+  const [sortBy, setSortBy] = useState('name')
+  const [sortDirection, setSortDirection] = useState('asc')
 
   // Load categories once on mount
   useEffect(() => {
@@ -122,12 +124,12 @@ export default function Products() {
     loadCategories()
   }, []) // Empty deps - run once
 
-  // Load products when filters change
+  // Load products when filters or sort change
   useEffect(() => {
     const load = async () => {
       setLoading(true)
       try {
-        const params = { page, size: 10, sortBy: 'id', direction: 'asc' }
+        const params = { page, size: 10, sortBy, direction: sortDirection }
         if (search) params.search = search
         if (filterCategory) params.category = filterCategory
         if (filterStatus !== '') params.active = filterStatus === 'active'
@@ -142,12 +144,37 @@ export default function Products() {
       }
     }
     load()
-  }, [page, search, filterCategory, filterStatus]) // Re-run only when these change
+  }, [page, search, filterCategory, filterStatus, sortBy, sortDirection]) // Re-run when sort changes too
 
   const openAdd = () => { setEditData(null); setModalOpen(true) }
   const openEdit = (p) => {
     setEditData({ ...p, categoryId: String(p.categoryId || p.category?.id || '') })
     setModalOpen(true)
+  }
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortDirection('asc')
+    }
+    setPage(0)
+  }
+
+  const SortableHeader = ({ children, field }) => {
+    const isActive = sortBy === field
+    return (
+      <button type="button"
+        onClick={() => handleSort(field)}
+        className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
+      >
+        {children}
+        <span className="text-xs">
+          {isActive ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </button>
+    )
   }
 
   const handleSave = async (form) => {
@@ -161,8 +188,8 @@ export default function Products() {
         toast.success('Product added successfully')
       }
       setModalOpen(false)
-      // Reload products
-      const params = { page, size: 10, sortBy: 'id', direction: 'asc' }
+      // Reload products with current sort
+      const params = { page, size: 10, sortBy, direction: sortDirection }
       if (search) params.search = search
       if (filterCategory) params.category = filterCategory
       if (filterStatus !== '') params.active = filterStatus === 'active'
@@ -181,8 +208,8 @@ export default function Products() {
     try {
       await toggleProductStatus(p.id, !p.active)
       toast.success(`Product ${!p.active ? 'activated' : 'deactivated'}`)
-      // Reload products
-      const params = { page, size: 10, sortBy: 'id', direction: 'asc' }
+      // Reload products with current sort
+      const params = { page, size: 10, sortBy, direction: sortDirection }
       if (search) params.search = search
       if (filterCategory) params.category = filterCategory
       if (filterStatus !== '') params.active = filterStatus === 'active'
@@ -195,7 +222,15 @@ export default function Products() {
     }
   }
 
-  const headers = ['Name', 'Category', 'Price', 'Unit', 'SKU', 'Status', 'Actions']
+  const headers = [
+    <SortableHeader field="name">Name</SortableHeader>,
+    <SortableHeader field="category.name">Category</SortableHeader>,
+    <SortableHeader field="price">Price</SortableHeader>,
+    <SortableHeader field="unit">Unit</SortableHeader>,
+    <SortableHeader field="sku">SKU</SortableHeader>,
+    <SortableHeader field="isActive">Status</SortableHeader>,
+    'Actions'
+  ]
 
   return (
     <Layout>

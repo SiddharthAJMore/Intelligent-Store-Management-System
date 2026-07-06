@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import Badge from '../components/common/Badge'
-import { formatCurrency, formatNumber } from '../utils/formatters'
-import { getSalesSummary, getTopProducts, getLowStockReport } from '../api/reports'
+import {formatCurrency, formatNumber} from '../utils/formatters'
+import {getLowStockReport, getSalesSummary, getTopProducts} from '../api/reports'
+import {getCategories} from "../api/categories.js";
 
 const PERIODS = ['daily', 'weekly', 'monthly']
 
@@ -12,6 +13,8 @@ export default function Reports() {
   const [period, setPeriod] = useState('daily')
   const [summary, setSummary] = useState(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [categoriesLoading, setCategoriesLoading] = useState(false)
   const [topProducts, setTopProducts] = useState([])
   const [topLimit, setTopLimit] = useState(10)
   const [topDays, setTopDays] = useState(30)
@@ -33,6 +36,23 @@ export default function Reports() {
     }
     loadSummary()
   }, [period]) // Re-run when period changes
+
+  useEffect(() => {
+    setCategoriesLoading(true)
+    const loadCategories = async () => {
+      try {
+        const categoryRes = await getCategories()
+        const categoryData = categoryRes.data?.data || categoryRes.data
+        const cats = categoryData?.content || categoryData || []
+        setCategories(Array.isArray(cats) ? cats : [])
+      } catch {
+        toast.error('Failed to load categories')
+      } finally {
+        setCategoriesLoading(false)
+      }
+    }
+    loadCategories()
+  }, [])
 
   useEffect(() => {
     const loadTopProducts = async () => {
@@ -157,7 +177,7 @@ export default function Reports() {
             </div>
           </div>
 
-          {topLoading ? (
+          {topLoading || categoriesLoading ? (
             <LoadingSpinner center />
           ) : topProducts.length > 0 ? (
             <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -185,7 +205,7 @@ export default function Reports() {
                         </span>
                       </td>
                       <td className="px-4 py-3 font-medium text-gray-800">{p.productName}</td>
-                      <td className="px-4 py-3 text-gray-500">{p.categoryName || '—'}</td>
+                      <td className="px-4 py-3 text-gray-500">{categories.find(cat => cat.id === p?.categoryId)?.name || '—'}</td>
                       <td className="px-4 py-3 text-right font-semibold text-gray-700">{formatNumber(p.totalUnits)}</td>
                       <td className="px-4 py-3 text-right font-bold text-green-700">{formatCurrency(p.totalRevenue)}</td>
                     </tr>
@@ -203,7 +223,7 @@ export default function Reports() {
           <h2 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
             ⚠️ Low Stock Report
           </h2>
-          {lowLoading ? (
+          {lowLoading || categoriesLoading ? (
             <LoadingSpinner center />
           ) : lowStock.length > 0 ? (
             <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -221,23 +241,22 @@ export default function Reports() {
                   {lowStock.map((item, i) => (
                     <tr key={i} className={`border-b border-gray-50 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                       <td className="px-4 py-3 font-medium text-gray-800">{item.productName}</td>
-                      <td className="px-4 py-3 text-gray-500">{item.categoryName || '—'}</td>
+                      <td className="px-4 py-3 text-gray-500">{categories.find(cat => cat.id === item?.categoryId)?.name || '—'}</td>
                       <td className="px-4 py-3 text-right font-bold">
-                        <span className={item.currentStock <= 5 ? 'text-red-600' : 'text-yellow-600'}>
+                        <span className={item.lowStockThreshold - item.quantity>= 10 ? 'text-red-600' : 'text-yellow-600'}>
                           {item.currentStock ?? item.quantity ?? 0}
                         </span>
                       </td>
                       <td className="py-2 px-3 text-right font-semibold">
                         <span
-                            className={item.lowStockThreshold - item.quantity >= 5 ? 'text-red-600' : 'text-yellow-600'}>
+                            className={item.lowStockThreshold - item.quantity >= 10 ? 'text-red-600' : 'text-yellow-600'}>
                           {item.lowStockThreshold}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant={item.lowStockThreshold - item.quantity >= 5 || item.lowStockThreshold - item.quantity > 0
+                        <Badge variant={item.lowStockThreshold - item.quantity > 0
                             ? 'danger' : 'warning'}>
-                          {item.lowStockThreshold - item.quantity >= 5
-                            || item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
+                          {item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
                         </Badge>
                       </td>
                     </tr>

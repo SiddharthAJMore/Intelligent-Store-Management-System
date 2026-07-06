@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -6,8 +6,8 @@ import Pagination from '../components/common/Pagination'
 import Modal from '../components/common/Modal'
 import Button from '../components/common/Button'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatCurrency, formatDate } from '../utils/formatters'
-import { getInvoices, getInvoice } from '../api/sales'
+import {formatCurrency, formatDate} from '../utils/formatters'
+import {getInvoice, getInvoices} from '../api/sales'
 
 function today() {
   return new Date().toISOString().split('T')[0]
@@ -20,6 +20,8 @@ export default function SalesHistory() {
   const [totalPages, setTotalPages] = useState(0)
   const [fromDate, setFromDate] = useState(today())
   const [toDate, setToDate] = useState(today())
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortDirection, setSortDirection] = useState('desc')
   const [viewInvoice, setViewInvoice] = useState(null)
   const [viewLoading, setViewLoading] = useState(false)
 
@@ -27,7 +29,7 @@ export default function SalesHistory() {
     const load = async () => {
       setLoading(true)
       try {
-        const params = { page, size: 10 }
+        const params = { page, size: 10, sortBy, direction: sortDirection }
         if (fromDate) params.from = fromDate
         if (toDate) params.to = toDate
         const res = await getInvoices(params)
@@ -41,7 +43,7 @@ export default function SalesHistory() {
       }
     }
     load()
-  }, [page, fromDate, toDate]) // Re-run when these change
+  }, [page, fromDate, toDate, sortBy, sortDirection]) // Re-run when sort changes
 
   const handleView = async (id) => {
     setViewLoading(true)
@@ -55,7 +57,38 @@ export default function SalesHistory() {
     }
   }
 
-  const headers = ['Invoice #', 'Cashier', 'Total', 'Date & Time', 'Actions']
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortDirection('asc')
+    }
+    setPage(0)
+  }
+
+  const SortableHeader = ({ children, field }) => {
+    const isActive = sortBy === field
+    return (
+      <button type="button"
+        onClick={() => handleSort(field)}
+        className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
+      >
+        {children}
+        <span className="text-xs">
+          {isActive ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </button>
+    )
+  }
+
+  const headers = [
+    <SortableHeader field="invoiceNumber">Invoice #</SortableHeader>,
+    <SortableHeader field="cashier.username">Cashier</SortableHeader>,
+    <SortableHeader field="totalAmount">Total</SortableHeader>,
+    <SortableHeader field="createdAt">Date & Time</SortableHeader>,
+    'Actions'
+  ]
 
   return (
     <Layout>
@@ -107,7 +140,7 @@ export default function SalesHistory() {
                     <td className="px-4 py-3 font-mono font-semibold text-gray-800">
                       #{inv.invoiceNumber || inv.id}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{inv.cashierName || inv.createdBy || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600">{inv.cashierUsername || '—'}</td>
                     <td className="px-4 py-3 font-bold text-green-700">{formatCurrency(inv.totalAmount)}</td>
                     <td className="px-4 py-3 text-gray-500 text-sm">{formatDate(inv.createdAt)}</td>
                     <td className="px-4 py-3">
@@ -146,7 +179,7 @@ export default function SalesHistory() {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Cashier</p>
-                <p className="font-medium text-gray-800">{viewInvoice.cashierName || viewInvoice.createdBy || '—'}</p>
+                <p className="font-medium text-gray-800">{viewInvoice.cashierUsername || viewInvoice.createdBy || '—'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Date & Time</p>

@@ -12,6 +12,7 @@ import com.grocerystore.module.inventory.repository.InventoryRepository;
 import com.grocerystore.module.inventory.repository.StockMovementRepository;
 import com.grocerystore.module.product.entity.Product;
 import com.grocerystore.module.product.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class InventoryService {
 
@@ -38,7 +40,23 @@ public class InventoryService {
     }
 
     public PageResponse<InventoryResponse> getInventory(int page, int size, String sortBy, String direction) {
-        Page<Inventory> result = inventoryRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy)));
+        log.debug("Sort by: {}", sortBy);
+        Page<Inventory> result;
+        
+        // Special handling for status sorting - sort by (quantity - lowStockThreshold)
+        if ("status".equalsIgnoreCase(sortBy)) {
+            if ("desc".equalsIgnoreCase(direction)) {
+                result = inventoryRepository.findAllOrderByStatusDesc(PageRequest.of(page, size));
+            } else {
+                result = inventoryRepository.findAllOrderByStatusAsc(PageRequest.of(page, size));
+            }
+        } else {
+            // Standard sorting for other fields
+            result = inventoryRepository.findAll(
+                PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy))
+            );
+        }
+        
         return toPageResponse(result.map(this::toResponse));
     }
 
@@ -95,6 +113,7 @@ public class InventoryService {
         return InventoryResponse.builder()
             .productId(inventory.getProduct().getId())
             .productName(inventory.getProduct().getName())
+            .categoryId(inventory.getProduct().getCategory().getId())
             .quantity(inventory.getQuantity())
             .lowStockThreshold(inventory.getLowStockThreshold())
             .lowStock(inventory.getQuantity() <= inventory.getLowStockThreshold())

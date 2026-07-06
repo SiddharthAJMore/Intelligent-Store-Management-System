@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
 import Pagination from '../components/common/Pagination'
 import Button from '../components/common/Button'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatNumber, formatDate } from '../utils/formatters'
-import { runAnalysis, getAssociationRules, getRestockSuggestions } from '../api/analytics'
+import {formatDate, formatNumber} from '../utils/formatters'
+import {getAssociationRules, getRestockSuggestions, runAnalysis} from '../api/analytics'
 
 export default function Analytics() {
   const [running, setRunning] = useState(false)
@@ -16,17 +16,21 @@ export default function Analytics() {
   const [rulesPage, setRulesPage] = useState(0)
   const [rulesTotalPages, setRulesTotalPages] = useState(0)
   const [rulesLoading, setRulesLoading] = useState(false)
+  const [rulesSortBy, setRulesSortBy] = useState('coOccurrenceCount')
+  const [rulesSortDirection, setRulesSortDirection] = useState('desc')
 
   const [restock, setRestock] = useState([])
   const [restockPage, setRestockPage] = useState(0)
   const [restockTotalPages, setRestockTotalPages] = useState(0)
   const [restockLoading, setRestockLoading] = useState(false)
+  const [restockSortBy, setRestockSortBy] = useState('daysUntilStockout')
+  const [restockSortDirection, setRestockSortDirection] = useState('asc')
 
   useEffect(() => {
     const loadRules = async () => {
       setRulesLoading(true)
       try {
-        const res = await getAssociationRules({ page: rulesPage, size: 20 })
+        const res = await getAssociationRules({ page: rulesPage, size: 20, sortBy: rulesSortBy, direction: rulesSortDirection })
         const d = res.data?.data || res.data
         const items = d?.content || d || []
         setRules(Array.isArray(items) ? items : [])
@@ -41,13 +45,13 @@ export default function Analytics() {
       }
     }
     loadRules()
-  }, [rulesPage]) // Re-run when page changes
+  }, [rulesPage, rulesSortBy, rulesSortDirection])
 
   useEffect(() => {
     const loadRestock = async () => {
       setRestockLoading(true)
       try {
-        const res = await getRestockSuggestions({ page: restockPage, size: 20 })
+        const res = await getRestockSuggestions({ page: restockPage, size: 20, sortBy: restockSortBy, direction: restockSortDirection })
         const d = res.data?.data || res.data
         const items = d?.content || d || []
         setRestock(Array.isArray(items) ? items : [])
@@ -62,7 +66,7 @@ export default function Analytics() {
       }
     }
     loadRestock()
-  }, [restockPage, lastRun]) // Re-run when page changes
+  }, [restockPage, restockSortBy, restockSortDirection, lastRun])
 
   const handleRunAnalysis = async () => {
     setRunning(true)
@@ -74,8 +78,8 @@ export default function Analytics() {
       setRestockPage(0)
       // Reload both
       const [rulesRes, restockRes] = await Promise.all([
-        getAssociationRules({ page: 0, size: 20 }),
-        getRestockSuggestions({ page: 0, size: 20 })
+        getAssociationRules({ page: 0, size: 20, sortBy: rulesSortBy, direction: rulesSortDirection }),
+        getRestockSuggestions({ page: 0, size: 20, sortBy: restockSortBy, direction: restockSortDirection })
       ])
       const rulesData = rulesRes.data?.data || rulesRes.data
       const rulesItems = rulesData?.content || rulesData || []
@@ -93,8 +97,61 @@ export default function Analytics() {
     }
   }
 
-  const rulesHeaders = ['Product A', 'Product B', 'Co-Occurrences', 'Support %', 'Confidence %']
-  const restockHeaders = ['Product', 'Current Stock', 'Avg Daily Sales', 'Days Until Stockout', 'Suggested Qty']
+  const handleRulesSort = (field) => {
+    if (rulesSortBy === field) {
+      setRulesSortDirection(rulesSortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setRulesSortBy(field)
+      setRulesSortDirection('asc')
+    }
+    setRulesPage(0)
+  }
+
+  const handleRestockSort = (field) => {
+    if (restockSortBy === field) {
+      setRestockSortDirection(restockSortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setRestockSortBy(field)
+      setRestockSortDirection('asc')
+    }
+    setRestockPage(0)
+  }
+
+  const SortableHeader = ({ children, field, sortBy, sortDirection }) => {
+    const isActive = sortBy === field
+    return (
+      <button type="button"
+        onClick={() => {
+          if (field === 'coOccurrenceCount' || field === 'support' || field === 'confidence') {
+            handleRulesSort(field)
+          } else {
+            handleRestockSort(field)
+          }
+        }}
+        className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
+      >
+        {children}
+        <span className="text-xs">
+          {isActive ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </button>
+    )
+  }
+
+  const rulesHeaders = [
+    'Product A',
+    'Product B',
+    <SortableHeader field="coOccurrenceCount" sortBy={rulesSortBy} sortDirection={rulesSortDirection}>Co-Occurrences</SortableHeader>,
+    <SortableHeader field="support" sortBy={rulesSortBy} sortDirection={rulesSortDirection}>Support %</SortableHeader>,
+    <SortableHeader field="confidence" sortBy={rulesSortBy} sortDirection={rulesSortDirection}>Confidence %</SortableHeader>
+  ]
+  const restockHeaders = [
+    'Product',
+    <SortableHeader field="currentStock" sortBy={restockSortBy} sortDirection={restockSortDirection}>Current Stock</SortableHeader>,
+    <SortableHeader field="avgDailySales" sortBy={restockSortBy} sortDirection={restockSortDirection}>Avg Daily Sales</SortableHeader>,
+    <SortableHeader field="daysUntilStockout" sortBy={restockSortBy} sortDirection={restockSortDirection}>Days Until Stockout</SortableHeader>,
+    <SortableHeader field="suggestedRestockQty" sortBy={restockSortBy} sortDirection={restockSortDirection}>Suggested Qty</SortableHeader>
+  ]
 
   return (
     <Layout>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 import Layout from '../components/layout/Layout'
 import Table from '../components/common/Table'
@@ -8,8 +8,9 @@ import Button from '../components/common/Button'
 import Input from '../components/common/Input'
 import Badge from '../components/common/Badge'
 import LoadingSpinner from '../components/common/LoadingSpinner'
-import { formatNumber, formatDate } from '../utils/formatters'
-import { getInventory, stockIn, getMovements } from '../api/inventory'
+import {formatDate, formatNumber} from '../utils/formatters'
+import {getInventory, getMovements, stockIn} from '../api/inventory'
+import {getCategories} from "../api/categories.js";
 
 function StockInModal({ isOpen, onClose, onSave, product, loading }) {
   const [form, setForm] = useState({ quantity: '', notes: '' })
@@ -154,18 +155,35 @@ function getStockLabel(stockVariant) {
 
 export default function Inventory() {
   const [items, setItems] = useState([])
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+  const [sortBy, setSortBy] = useState('product.name')
+  const [sortDirection, setSortDirection] = useState('asc')
   const [stockInTarget, setStockInTarget] = useState(null)
   const [movementsTarget, setMovementsTarget] = useState(null)
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoryRes = await getCategories()
+        const categoryData = categoryRes.data?.data || categoryRes.data
+        const cats = categoryData?.content || categoryData || []
+        setCategories(Array.isArray(cats) ? cats : [])
+      } catch {
+        toast.error('Failed to load categories')
+      }
+    }
+    loadCategories()
+  }, [])
 
   useEffect(() => {
     const load = async () => {
       setLoading(true)
       try {
-        const res = await getInventory({ page, size: 10 })
+        const res = await getInventory({ page, size: 10, sortBy, direction: sortDirection })
         const d = res.data?.data || res.data
         setItems(d?.content || d || [])
         setTotalPages(d?.totalPages ?? 1)
@@ -176,7 +194,7 @@ export default function Inventory() {
       }
     }
     load()
-  }, [page]) // Only re-run when page changes
+  }, [page, sortBy, sortDirection]) // Re-run when sort changes too
 
   const handleStockIn = async (data) => {
     setSaving(true)
@@ -184,8 +202,8 @@ export default function Inventory() {
       await stockIn(data)
       toast.success('Stock added successfully')
       setStockInTarget(null)
-      // Reload inventory
-      const res = await getInventory({ page, size: 10 })
+      // Reload inventory with current sort
+      const res = await getInventory({ page, size: 10, sortBy, direction: sortDirection })
       const d = res.data?.data || res.data
       setItems(d?.content || d || [])
       setTotalPages(d?.totalPages ?? 1)
@@ -196,7 +214,39 @@ export default function Inventory() {
     }
   }
 
-  const headers = ['Product', 'Category', 'Current Stock', 'Status', 'Actions']
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortDirection('asc')
+    }
+    setPage(0)
+  }
+
+  const SortableHeader = ({ children, field }) => {
+    const isActive = sortBy === field
+    return (
+      <button type="button"
+        onClick={() => handleSort(field)}
+        className="flex items-center gap-1.5 hover:text-green-700 font-medium transition-colors"
+      >
+        {children}
+        <span className="text-xs">
+          {isActive ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </button>
+    )
+  }
+
+  const headers = [
+    <SortableHeader field="product.name">Product</SortableHeader>,
+    <SortableHeader field="product.category.name">Category</SortableHeader>,
+    <SortableHeader field="quantity">Current Stock</SortableHeader>,
+    'Low Stock Threshold',
+    <SortableHeader field="status">Status</SortableHeader>,
+    'Actions'
+  ]
 
   let stockVariant;
   return (
@@ -216,14 +266,23 @@ export default function Inventory() {
                 renderRow={(item) => (
                   <>
                     <td className="px-4 py-3 font-medium text-gray-800">{item.productName}</td>
-                    <td className="px-4 py-3 text-gray-500">{item.categoryName || '—'}</td>
-                    <td className="px-4 py-3 font-bold text-lg">
+                    <td className="px-4 py-3 text-gray-500">{categories.find(cat=>cat.id===item?.categoryId)?.name || '—'}</td>
+                    <td className="px-12 py-3 font-bold text-lg">
                       <span className={
                         (stockVariant =
                             getStockVariant(item.quantity, item.lowStockThreshold)) === 'danger' ? 'text-red-600' :
                                 stockVariant === 'warning' ? 'text-yellow-600' : 'text-green-600'
                       }>
                         {formatNumber(item.quantity)}
+                      </span>
+                    </td>
+                    <td className="px-16 py-3 font-bold text-lg">
+                      <span className={
+                        (stockVariant =
+                            getStockVariant(item.quantity, item.lowStockThreshold)) === 'danger' ? 'text-red-600' :
+                            stockVariant === 'warning' ? 'text-yellow-600' : 'text-green-600'
+                      }>
+                        {formatNumber(item.lowStockThreshold)}
                       </span>
                     </td>
                     <td className="px-4 py-3">

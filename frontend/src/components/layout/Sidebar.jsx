@@ -1,6 +1,6 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
+import {NavLink} from 'react-router-dom'
+import {useAuth} from '../../hooks/useAuth'
 
 const adminLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -28,7 +28,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-2">
           <span className="text-2xl">🛒</span>
           <div>
-            <p className="font-bold text-white text-sm">Smart Grocery</p>
+            <p className="font-bold text-white text-sm">Smart Store</p>
             <p className="text-gray-400 text-xs">Management System</p>
           </div>
         </div>

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class TopProductResponse {
     private Long productId;
     private String productName;
+    private Long categoryId;
     private long totalUnits;
     private BigDecimal totalRevenue;
 }

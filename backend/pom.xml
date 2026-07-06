@@ -15,7 +15,7 @@
     <artifactId>grocery-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>grocery-backend</name>
-    <description>Smart Grocery Billing and Inventory Management System backend</description>
+    <description>Smart Inventory Management System backend</description>
 
     <properties>
         <java.version>17</java.version>

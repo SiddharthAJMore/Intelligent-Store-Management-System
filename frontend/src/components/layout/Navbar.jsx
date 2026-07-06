@@ -1,5 +1,5 @@
 import React from 'react'
-import { useAuth } from '../../hooks/useAuth'
+import {useAuth} from '../../hooks/useAuth'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -8,7 +8,7 @@ export default function Navbar() {
     <header className="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
       <div className="flex items-center gap-3">
         <span className="text-2xl">🛒</span>
-        <span className="text-xl font-bold text-green-700">Smart Grocery</span>
+        <span className="text-xl font-bold text-green-700">Smart Store</span>
       </div>
       <div className="flex items-center gap-4">
         <div className="text-right">

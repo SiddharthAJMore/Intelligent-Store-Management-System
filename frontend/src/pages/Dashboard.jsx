@@ -1,13 +1,10 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import toast from 'react-hot-toast'
-import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar
-} from 'recharts'
+import {Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts'
 import Layout from '../components/layout/Layout'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import {formatCurrency, formatNumber} from '../utils/formatters'
-import {getSalesSummary, getTopProducts, getLowStockReport} from '../api/reports'
+import {getSalesSummary, getTopProducts} from '../api/reports'
 import {getProductCount} from '../api/products'
 import {getLowStock} from '../api/inventory'
 import Badge from "../components/common/Badge.jsx";
@@ -46,7 +43,7 @@ export default function Dashboard() {
                 const [summaryRes, topRes, lowRes, prodRes] = await Promise.allSettled([
                     getSalesSummary({period: 'daily'}),
                     getTopProducts({limit: 5, days: 30}),
-                    getLowStock({page: 0, size: 5}),
+                    getLowStock({page: 0, size: 10}),
                     getProductCount(),
                 ])
 
@@ -63,7 +60,7 @@ export default function Dashboard() {
                 if (lowRes.status === 'fulfilled') {
                     const d = lowRes.value.data?.data || lowRes.value.data
                     const items = d?.content || d || []
-                    setLowStockItems(Array.isArray(items) ? items.slice(0, 5) : [])
+                    setLowStockItems(Array.isArray(items) ? items.slice(0, 10) : [])
                     setLowStockCount(d?.totalElements ?? (Array.isArray(items) ? items.length : 0))
                 }
                 if (prodRes.status === 'fulfilled') {
@@ -201,21 +198,20 @@ export default function Dashboard() {
                                         <td className="py-2 px-3 text-gray-500">{item.categoryName || '—'}</td>
                                         <td className="py-2 px-3 text-right font-semibold">
                                             <span
-                                                className={item.lowStockThreshold - item.quantity >= 5 ? 'text-red-600' : 'text-yellow-600'}>
+                                                className={item.lowStockThreshold - item.quantity >= 10 ? 'text-red-600' : 'text-yellow-600'}>
                                               {item.quantity}
                                             </span>
                                         </td>
                                         <td className="py-2 px-3 text-right font-semibold">
                                             <span
-                                                className={item.lowStockThreshold - item.quantity >= 5 ? 'text-red-600' : 'text-yellow-600'}>
+                                                className={item.lowStockThreshold - item.quantity >= 10 ? 'text-red-600' : 'text-yellow-600'}>
                                               {item.lowStockThreshold}
                                             </span>
                                         </td>
                                         <td className="py-2 px-3">
-                                            <Badge variant={item.lowStockThreshold - item.quantity >= 5 || item.lowStockThreshold - item.quantity > 0
+                                            <Badge variant={item.lowStockThreshold - item.quantity > 0
                                                 ? 'danger' : 'warning'}>
-                                                {item.lowStockThreshold - item.quantity >= 5
-                                                || item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
+                                                {item.lowStockThreshold - item.quantity > 0 ? 'Critical' : 'Low'}
                                             </Badge>
                                         </td>
                                     </tr>

@@ -1,8 +1,8 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
-import { AuthProvider } from './context/AuthContext'
-import { useAuth } from './hooks/useAuth'
+import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
+import {Toaster} from 'react-hot-toast'
+import {AuthProvider} from './context/AuthContext'
+import {useAuth} from './hooks/useAuth'
 import PrivateRoute from './routes/PrivateRoute'
 import RoleRoute from './routes/RoleRoute'
 
